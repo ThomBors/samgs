@@ -1,20 +1,8 @@
-original code from https://github.com/Cranial-XIX/FAMO/tree/main/experiments/toy
 
-Famo, 2023
+# Illustrative Example
 
-set pythonpath
+Illustrative example of two different loss function conbination with one unique global optimum.
 
-export PYTHONPATH=$(pwd)
+Modification of the code in [FAMO](https://github.com/Cranial-XIX/FAMO).
 
-run command
 
-```
-python toy_problem/main.py  -m interest_function=f1,f2,f12 optimization=alignedmtl,cagrad,famo,graddrop,l2bmgrad,logbmgrad,ls,minbmgrad,pcgrad
-```
-
-run command for thopology study
-
-```
-python toy_problem/main.py --config-name=config_thopology
-
-```

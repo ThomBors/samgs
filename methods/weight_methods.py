@@ -323,8 +323,6 @@ class CAGrad(WeightMethod):
         # store the gradients
         grads[:, task].fill_(0.0)
         cnt = 0
-        # for mm in m.shared_modules():
-        #     for p in mm.parameters():
 
         for param in shared_params:
             grad = param.grad
@@ -339,8 +337,6 @@ class CAGrad(WeightMethod):
         newgrad = newgrad * self.n_tasks  # to match the sum loss
         cnt = 0
 
-        # for mm in m.shared_modules():
-        #     for param in mm.parameters():
         for param in shared_parameters:
             beg = 0 if cnt == 0 else sum(grad_dims[:cnt])
             en = sum(grad_dims[: cnt + 1])
@@ -412,8 +408,6 @@ class GradDrop(WeightMethod):
         # store the gradients
         grads[:, task].fill_(0.0)
         cnt = 0
-        # for mm in m.shared_modules():
-        #     for p in mm.parameters():
 
         for param in shared_params:
             grad = param.grad
@@ -428,8 +422,6 @@ class GradDrop(WeightMethod):
         newgrad = newgrad * self.n_tasks  # to match the sum loss
         cnt = 0
 
-        # for mm in m.shared_modules():
-        #     for param in mm.parameters():
         for param in shared_parameters:
             beg = 0 if cnt == 0 else sum(grad_dims[:cnt])
             en = sum(grad_dims[: cnt + 1])
@@ -449,7 +441,7 @@ class GradDrop(WeightMethod):
         ] = None,
         **kwargs,
     ):
-        #GTG, w = self.get_weighted_loss(losses, shared_parameters)
+        
         self.get_weighted_loss(losses, shared_parameters)
         if self.max_norm > 0:
             torch.nn.utils.clip_grad_norm_(shared_parameters, self.max_norm)
@@ -539,46 +531,36 @@ class AlignedMTL(WeightMethod):
     
             
     def alignedmtl(self, grads, scale_mode='min', rescale=1,weights=None):
-        # Compute the task space Gram matrix M = G^T G
-        M = grads.T @ grads  # Compute Gram matrix
+        M = grads.T @ grads  
 
-        # Compute eigenvalues and eigenvectors
         singulars, basis = torch.linalg.eigh(M)
 
-        # Sorting in descending order
         sorted_indices = torch.argsort(singulars, descending=True)
         singulars = singulars[sorted_indices]
         basis = basis[:, sorted_indices]
 
-        # Compute tolerance and rank
         tol = singulars.max() * max(M.shape) * torch.finfo(singulars.dtype).eps
         rank = (singulars > tol).sum().item()
 
-        # Filter based on rank
         singulars = singulars[:rank]
         basis = basis[:, :rank]
 
-        # Compute the inverse square root of singular values
         inv_sqrt_singulars = torch.diag(1.0 / torch.sqrt(singulars))
-        inv_sqrt_singulars[torch.isinf(inv_sqrt_singulars)] = 0  # Handle inf
+        inv_sqrt_singulars[torch.isinf(inv_sqrt_singulars)] = 0  
 
-        # Compute the transformation matrix B
-        # Compute balance transformation matrix B = √λRV Σ−1V⊤
+        # B = √λRV Σ−1V⊤
         sqrt_singulars = torch.sqrt(singulars)
         B = sqrt_singulars[-1].view(1, -1) * basis @ inv_sqrt_singulars @ basis.T 
-        
-        # If no user-provided weights, default to equal weights
+
         if weights is None:
             weights = torch.diag(torch.ones(grads.shape[1], device=grads.device))
         
-        # Compute the final weighted gradient: α = Bw
+        # α = Bw
         alpha = B @ weights
 
-        # Apply the transformation to the gradients: Gα
+        # Gα
         aligned_grads = grads @ alpha
-
         g = aligned_grads.sum(1)
-
 
         return g,aligned_grads, weights
         
@@ -588,8 +570,6 @@ class AlignedMTL(WeightMethod):
         # store the gradients
         grads[:, task].fill_(0.0)
         cnt = 0
-        # for mm in m.shared_modules():
-        #     for p in mm.parameters():
 
         for param in shared_params:
             grad = param.grad
@@ -603,9 +583,7 @@ class AlignedMTL(WeightMethod):
     def overwrite_grad(self, shared_parameters, newgrad, grad_dims):
         newgrad = newgrad * self.n_tasks  # to match the sum loss
         cnt = 0
-        
-        # for mm in m.shared_modules():
-        #     for param in mm.parameters():
+
         for param in shared_parameters:
             beg = 0 if cnt == 0 else sum(grad_dims[:cnt])
             en = sum(grad_dims[: cnt + 1])
@@ -871,13 +849,11 @@ class  SAMGS(WeightMethod):
             else:
                 losses[i].backward()
             self.grad2vec(shared_parameters, grads, grad_dims, i)
-            # multi_task_model.zero_grad_shared_modules()
             for p in shared_parameters:
                 p.grad = None
         
         g,aligned_grads, weights = self.balance_magnitude(grads)
         self.overwrite_grad(shared_parameters, g, grad_dims)
-        # self.update(loss)
         return losses.sum(), {"loss":losses,"grad":g,"method":weights,"weights":aligned_grads}
     
     def balance_magnitude(self,grads):
@@ -885,10 +861,9 @@ class  SAMGS(WeightMethod):
         w = grads.clone().detach()
 
         mg = torch.linalg.norm(w, dim=0)
-        mg_matrix = mg.unsqueeze(1)  # Shape: (N, 1)
-        mg_matrix_T = mg_matrix.T    # Shape: (1, N)
+        mg_matrix = mg.unsqueeze(1)  
+        mg_matrix_T = mg_matrix.T    
 
-        # Compute pairwise similarities using broadcasting
         similarities_matrix = 2 * (mg_matrix @ mg_matrix_T) / (mg_matrix**2 + mg_matrix_T**2)
 
         mask = torch.triu(torch.ones_like(similarities_matrix, dtype=torch.bool), diagonal=1)
@@ -904,15 +879,10 @@ class  SAMGS(WeightMethod):
         if ((similarities.mean() < self.gamma)):
             #### l2 standardization ####
             l2_norms = torch.norm(w, dim=0, p=2)
-
-            # Rescale each vector to have unit L2 norm
             scaled_w_l2 = w / l2_norms
-
-            # Using the mean magnitude of the columns
             scaling_factor = l2_norms.mean()  
             adjusted_g_l2 = scaled_w_l2 * scaling_factor 
 
-            # Sum of L2-normalized vectors
             g = adjusted_g_l2.sum(1)
             aligned_w = adjusted_g_l2
             w = g
@@ -929,8 +899,6 @@ class  SAMGS(WeightMethod):
         # store the gradients
         grads[:, task].fill_(0.0)
         cnt = 0
-        # for mm in m.shared_modules():
-        #     for p in mm.parameters():
 
         for param in shared_params:
             grad = param.grad
@@ -945,8 +913,6 @@ class  SAMGS(WeightMethod):
         newgrad = newgrad * self.n_tasks  # to match the sum loss
         cnt = 0
 
-        # for mm in m.shared_modules():
-        #     for param in mm.parameters():
         for param in shared_parameters:
             beg = 0 if cnt == 0 else sum(grad_dims[:cnt])
             en = sum(grad_dims[: cnt + 1])
