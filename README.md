@@ -35,47 +35,40 @@ python famo.py
 
 ### Setup environment
 
-Create the conda environment and install torch
+Create the environment and install dependecies
 ```bash
-conda create -n mtl python=3.9.7
-conda activate mtl
-pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
-```
-
-Install the repo:
-```bash
-git clone https://github.com/Cranial-XIX/FAMO.git
-cd FAMO
-pip install -e .
-```
+  $ cd samgs
+  $ python3 -m venv myenv
+  $ source myenv/bin/activate
+  $ pip install -U pip
+  $ pip install -r requirements.txt
+  ```
 
 ### Download dataset
 
-We follow the [MTAN](https://github.com/lorenmt/mtan) paper. The datasets could be downloaded from [NYU-v2](https://www.dropbox.com/sh/86nssgwm6hm3vkb/AACrnUQ4GxpdrBbLjb6n-mWNa?dl=0) and [CityScapes](https://www.dropbox.com/sh/gaw6vh6qusoyms6/AADwWi0Tp3E3M4B2xzeGlsEna?dl=0). To download the CelebA dataset, please refer to this [link](https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg). The dataset should be put under ```experiments/EXP_NAME/dataset/``` folder where ```EXP_NAME``` is chosen from ```nyuv2, cityscapes, celeba```. Note that ```quantum_chemistry``` will download the data automatically.
+The datasets could be downloaded from [NYU-v2](https://www.dropbox.com/sh/86nssgwm6hm3vkb/AACrnUQ4GxpdrBbLjb6n-mWNa?dl=0) and [CityScapes](https://www.dropbox.com/sh/gaw6vh6qusoyms6/AADwWi0Tp3E3M4B2xzeGlsEna?dl=0). To download the CelebA dataset, please refer to this [link](https://drive.google.com/drive/folders/0B7EVK8r0v71pWEZsZE9oNnFzTm8?resourcekey=0-5BR16BdXnb8hVj6CNHKzLg). The dataset should be put under ```dataset/EXP_NAME/``` folder where ```EXP_NAME``` is chosen from ```nyuv2, cityscapes, celeba```.
 
 The file hierarchy should look like
 ```
-FAMO
+samgs             
+ └─ dataset                       (the dataset folder containing the MTL data)
  └─ experiments
      └─ utils.py                     (for argument parsing)
      └─ nyuv2
-         └─ dataset                  (the dataset folder containing the MTL data)
+         └─ conf 
          └─ trainer.py               (the main file to run the training)
-         └─ run.sh                   (the command to reproduce FAMO's results)
      └─ cityscapes
-         └─ dataset                  (the dataset folder containing the MTL data)
+         └─ conf                  (the configuration folder containing the experiments configuration)
          └─ trainer.py               (the main file to run the training)
-         └─ run.sh                   (the command to reproduce FAMO's results)
      └─ quantum_chemistry
-         └─ dataset                  (the dataset folder containing the MTL data)
+         └─ conf                  (the configuration folder containing the experiments configuration)
          └─ trainer.py               (the main file to run the training)
-         └─ run.sh                   (the command to reproduce FAMO's results)
      └─ celeba
-         └─ dataset                  (the dataset folder containing the MTL data)
+         └─ conf                  (the configuration folder containing the experiments configuration)
          └─ trainer.py               (the main file to run the training)
-         └─ run.sh                   (the command to reproduce FAMO's results)
  └─ methods
      └─ weight_methods.py            (the different MTL optimizers)
+ └─ run.sh                   (the command to run experiments)
 ```
 
 ### Run experiment
@@ -126,35 +119,3 @@ Following [CAGrad](https://github.com/Cranial-XIX/CAGrad), the MTRL experiments 
 cd PATH_TO_MTRL/mtrl_files/ && chmod +x mv.sh && ./mv.sh
 ```
 Then follow the `run.sh` script to run experiments (We are still testing the results but the code should be runnable).
-
-
-## IV. Citation
-
-This repo is built upon [CAGrad](https://github.com/Cranial-XIX/CAGrad) and [NashMTL](https://github.com/AvivNavon/nash-mtl).
-If you find **FAMO** to be useful in your own research, please consider citing the following papers:
-
-```bib
-@misc{liu2023famo,
-      title={FAMO: Fast Adaptive Multitask Optimization}, 
-      author={Bo Liu and Yihao Feng and Peter Stone and Qiang Liu},
-      year={2023},
-      eprint={2306.03792},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
-
-@article{liu2021conflict,
-  title={Conflict-Averse Gradient Descent for Multi-task Learning},
-  author={Liu, Bo and Liu, Xingchao and Jin, Xiaojie and Stone, Peter and Liu, Qiang},
-  journal={Advances in Neural Information Processing Systems},
-  volume={34},
-  year={2021}
-}
-
-@article{navon2022multi,
-  title={Multi-Task Learning as a Bargaining Game},
-  author={Navon, Aviv and Shamsian, Aviv and Achituve, Idan and Maron, Haggai and Kawaguchi, Kenji and Chechik, Gal and Fetaya, Ethan},
-  journal={arXiv preprint arXiv:2202.01017},
-  year={2022}
-}
-```
