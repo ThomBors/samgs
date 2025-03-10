@@ -1,0 +1,38 @@
+defaults:
+  - interest_function: f12
+  - optimization: ls
+
+name: ${hydra:choices.optimization}
+
+problem:
+  scale: 1.0
+  scale_both_losses: 1.0
+  
+  
+trainer:
+  n_epochs: 21000
+  use_cuda: True
+  random_seed: 42
+
+  
+plotSpecification:
+  inits: 
+    - [-3.5, 5.5]
+    - [3.5, 5.5]
+    - [-6.5, 2.5]
+    - [6.5, 2.5]
+    - [0, 10.0]
+    - [0, -8]
+  pareto_points: 300
+
+
+out_path:
+  plots: ${hydra:runtime.cwd}/results/toy_2optimal/outputs
+  # plots: ${hydra:runtime.cwd}/toy_problem/outputs_center
+  time:  ${hydra:runtime.cwd}/results/toy_2optimal/time
+  
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/results/toy_2optimal/${hydra:runtime.version}
+
+

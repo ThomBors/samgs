@@ -1,0 +1,29 @@
+defaults:
+  - optimization: ls
+  - model: mtan
+
+
+random_seed: 42
+  
+trainer:
+  use_cuda: True 
+  apply_augmentation: True
+  n_epochs: 200 
+  batch_size: 8
+  lr: 1e-4
+
+logger:
+  wandb: False
+  project: "MTLoptimization"
+  
+data_path: ${hydra:runtime.cwd}/dataset/cityscapes/
+
+out_path: ${hydra:runtime.cwd}/results/cityscapes/${hydra:runtime.version}/outputs
+
+checkpoint:
+  path: ${hydra:runtime.cwd}/checkpoints/cityscapes
+  save: False
+  
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/results/cityscapes/${hydra:runtime.version}

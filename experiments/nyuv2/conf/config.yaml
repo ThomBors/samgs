@@ -1,0 +1,29 @@
+defaults:
+  - optimization: ls
+  - model: mtan
+
+
+random_seed: 42
+  
+trainer:
+  use_cuda: True 
+  apply_augmentation: True
+  n_epochs: 200 
+  batch_size: 2
+  lr: 1e-4
+
+
+logger:
+  wandb: False
+  project: "MTLoptimization"
+  
+  
+data_path: ${hydra:runtime.cwd}/dataset/nyuv2/
+
+out_path: ${hydra:runtime.cwd}/results/nyuv2/${hydra:runtime.version}/outputs
+
+checkpoint_path: ${hydra:runtime.cwd}/checkpoints/nyuv2
+  
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/results/nyuv2/${hydra:runtime.version}

@@ -1,0 +1,35 @@
+defaults:
+  - _self_
+  - interest_function: f12
+  - optimization: ls
+
+problem:
+  scale: 1.0
+  scale_both_losses: 1.0
+  
+  
+trainer:
+  n_epochs: 20000
+  use_cuda: True
+  random_seed: 42
+
+  
+plotSpecification:
+  inits: 
+    - [-8, 5.0]
+    - [-3, 7.5]
+    - [0, 10.0]
+    - [3, 7.5]
+    - [8, 5.0]
+    - [-10,-3]
+    - [10,-3]
+
+
+out_path:
+  plots: ${hydra:runtime.cwd}/results/toy_problem/outputs
+  # plots: ${hydra:runtime.cwd}/toy_problem/outputs_center
+  time:  ${hydra:runtime.cwd}/results/toy_problem/time
+  
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/results/toy_problem/${hydra:runtime.version}

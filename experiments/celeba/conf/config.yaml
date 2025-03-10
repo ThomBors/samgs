@@ -1,0 +1,27 @@
+defaults:
+  - optimization: ls
+
+
+random_seed: 42
+  
+trainer:
+  use_cuda: True
+  n_epochs: 15 
+  batch_size: 256
+  lr: 3e-4
+
+
+logger:
+  wandb: False
+  project: "MTLoptimization"
+  
+  
+data_path: ${hydra:runtime.cwd}/dataset/celeba/
+
+out_path: ${hydra:runtime.cwd}/results/celeba/${hydra:runtime.version}/outputs
+
+checkpoint_path: ${hydra:runtime.cwd}/checkpoints/celeba
+  
+hydra:
+  run:
+    dir: ${hydra:runtime.cwd}/results/celeba/${hydra:runtime.version}

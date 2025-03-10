@@ -1,0 +1,17 @@
+numpy==2.2.2
+scipy==1.14.1
+cvxpy==1.5.3
+findiff==0.10.2
+
+torch==2.6.0 
+torchvision==0.21.0 
+torcheval==0.0.7
+torch-geometric==2.6.1
+hydra-core==1.3.2
+
+tqdm==4.67.1 
+# plotext==5.2.8
+matplotlib==3.9.2
+seaborn==0.13.2 
+
+wandb==0.19.5
