@@ -8,7 +8,7 @@ This challenge arises when the gradients of the task objectives have either diff
 Gradient surgery methods address the problem explicitly dealing with conflicting gradients by adjusting the overall gradient trajectory.
 This work introduces a novel gradient surgery method, the Similarity-Aware Momentum Gradient Surgery (**SAM-GS**), which provides an effective and scalable approach based on a gradient magnitude similarity measure to guide the optimisation process.
 The **SAM-GS** surgery adopts gradient equalisation and modulation of the *first-order momentum*.
-A series of experimental tests have shown the effectiveness of **SAM-GS** on synthetic problems and $MTL$ benchmarks. Gradient magnitude similarity plays an important role in *regularising gradient aggregation* in *MTDL* for the optimisation of the learning process.
+A series of experimental tests have shown the effectiveness of **SAM-GS** on synthetic problems and *MTL* benchmarks. Gradient magnitude similarity plays an important role in *regularising gradient aggregation* in *MTDL* for the optimisation of the learning process.
 
 ---
 
