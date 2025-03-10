@@ -1,1 +1,2 @@
 method: graddrop
+max_norm: 1.0

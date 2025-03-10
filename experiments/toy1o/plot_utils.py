@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-##################################################################
-# Adaptation of code from: https://github.com/Cranial-XIX/CAGrad #
-##################################################################
 
 import torch
 import numpy as np

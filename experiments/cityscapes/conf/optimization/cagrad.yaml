@@ -1,1 +1,3 @@
 method: cagrad
+alpha: 0.5
+rescale: 1

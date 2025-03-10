@@ -34,17 +34,17 @@ def trainer(cfg, device):
         x = x.to(device)
         x.requires_grad = True
         
-        method_params = cfg.get(cfg.optimization.method)
+        method_params = dict(cfg.optimization)
+        method_params.pop("method", None)
 
         method = WeightMethods(
             method= cfg.optimization.method,
             device=device,
-            n_tasks=n_tasks
+            n_tasks=n_tasks,
+            ** method_params
         )
 
         optimizer = torch.optim.Adam(params=[x], lr=1e-3)
-        #optimizer = torch.optim.SGD(params=[x], lr=1e-3)
-        #optimizer = torch.optim.RMSprop(params=[x], lr=1e-3)
 
         t0 = time.time()
         for it in tqdm(range(cfg.trainer.n_epochs)):
@@ -52,6 +52,11 @@ def trainer(cfg, device):
 
             optimizer.zero_grad()
             f,g = F(x, True)
+
+            if "famo" in cfg.optimization.method and it > 0:
+                with torch.no_grad():
+                    method.method.update(f)
+
             grad.append(g)
             _, extra_outputs = method.backward(
                 losses=f.to(device),

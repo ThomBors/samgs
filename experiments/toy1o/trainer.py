@@ -43,11 +43,14 @@ def trainer(cfg, device):
         x = x.to(device)
         x.requires_grad = True
         
+        method_params = dict(cfg.optimization)
+        method_params.pop("method", None)
+
         method = WeightMethods(
             method= cfg.optimization.method,
             device=device,
             n_tasks=n_tasks,
-            # **method_params
+            ** method_params
         )
 
         optimizer = torch.optim.Adam(params=[x], lr=1e-3)
@@ -59,6 +62,12 @@ def trainer(cfg, device):
             optimizer.zero_grad()
             f,g = F(x, True)
             grad.append(g)
+            f = F(x, False)
+            
+            if "famo" in cfg.optimization.method and it > 0:
+                with torch.no_grad():
+                    method.method.update(f)
+
             _, extra_outputs = method.backward(
                 losses=f.to(device),
                 shared_parameters=(x,),

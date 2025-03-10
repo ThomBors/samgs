@@ -12,11 +12,14 @@ A series of experimental tests have shown the effectiveness of {\sc SAM-GS} on s
 
 ---
 
-<!-- <p align="center"> 
-    <img src="https://github.com/Cranial-XIX/FAMO/blob/main/misc/fig.png" width="800">
-</p> -->
+<p align="center"> 
+    <img src="misc/pareto.png" width="800">
+</p>
 
-**Top left**: The loss landscape, and individual task losses of a toy 2-task learning problem (★ represents the minimum of task losses). **Top right**: the runtime of different MTL methods for 50000 steps. Bottom: the loss trajectories of different MTL methods. ADAM fails in 1 out of 5 runs to reach the Pareto front due to CG. **FAMO** decreases task losses in a balanced way and is the only method matching the $\mathcal{O}(1)$ space/time complexity of ADAM.
+
+Comparison of different MTL methods for 20000 steps. 
+**Top Line**: The loss trajectories of different MTL methods in the loss space. 
+**Bottom Line**: The loss trajectories of different MTL methods in the parameters space.
 
 ---
 
@@ -25,11 +28,6 @@ A series of experimental tests have shown the effectiveness of {\sc SAM-GS} on s
 </p> -->
 
 
-## I. FAMO Example Usage
-For the convenience of potential users of **FAMO**, we provide a simple example in ```famo.py``` so that users can easily adapt **FAMO** to their applications. The code requires installation of ```torch```, which can be installed via the setup in the next section. Check the file and simply run
-```
-python famo.py
-```
 
 ## II. Image-to-Image Prediction
 
@@ -53,37 +51,35 @@ The file hierarchy should look like
 samgs             
  └─ dataset                       (the dataset folder containing the MTL data)
  └─ experiments
-     └─ utils.py                     (for argument parsing)
+     └─ utils.py                  (for argument parsing)
      └─ nyuv2
          └─ conf 
-         └─ trainer.py               (the main file to run the training)
+         └─ trainer.py            (the main file to run the training)
      └─ cityscapes
          └─ conf                  (the configuration folder containing the experiments configuration)
-         └─ trainer.py               (the main file to run the training)
-     └─ quantum_chemistry
-         └─ conf                  (the configuration folder containing the experiments configuration)
-         └─ trainer.py               (the main file to run the training)
+         └─ trainer.py            (the main file to run the training)
      └─ celeba
          └─ conf                  (the configuration folder containing the experiments configuration)
-         └─ trainer.py               (the main file to run the training)
+         └─ trainer.py            (the main file to run the training)
+     └─ toy1o
+         └─ conf                  (the configuration folder containing the experiments configuration)
+         └─ main.py               (the main file to run the training)
+     └─ toy2o
+         └─ conf                  (the configuration folder containing the experiments configuration)
+         └─ main.py               (the main file to run the training)
  └─ methods
-     └─ weight_methods.py            (the different MTL optimizers)
- └─ run.sh                   (the command to run experiments)
+     └─ weight_methods.py         (the different MTL optimizers)
+ └─ run.sh                        (the command to run experiments)
 ```
 
 ### Run experiment
 
-To run experiments, go to the relevant folder with name ```EXP_NAME```
+To run experiments all the experiments it is possbile to use the ```run.sh```
 ```bash
-cd experiments/EXP_NAME
 bash run.sh
 ```
-You can check the ```run.sh``` for details about training with **FAMO**.
+You can check the ```experiments/EXP_NAME/readme.md``` for details about training the supprted optimisers with **Hydra**.
 
-Following [NashMTL](https://github.com/AvivNavon/nash-mtl), we also support experiment tracking with **[Weights & Biases](https://wandb.ai/site)** with two additional parameters:
-```bash
-python trainer.py --method=famo --wandb_project=<project-name> --wandb_entity=<entity-name>
-```
 
 ### MTL methods
 
@@ -94,6 +90,7 @@ python trainer.py --method=X
 
 | Method (code name) | Paper (notes) |
 | :---: | :---: |
+| Aligned-MTL (`alignedmtl`) | [Fast Adaptive Multitask Optimization](https://openaccess.thecvf.com/content/CVPR2023/papers/Senushkin_Independent_Component_Alignment_for_Multi-Task_Learning_CVPR_2023_paper.pdf) |
 | FAMO (`famo`) | [Fast Adaptive Multitask Optimization](https://arxiv.org/abs/2306.03792.pdf) |
 | Nash-MTL (`nashmtl`) | [Multi-Task Learning as a Bargaining Game](https://arxiv.org/pdf/2202.01017v1.pdf) |
 | CAGrad (`cagrad`) | [Conflict-Averse Gradient Descent for Multi-task Learning](https://arxiv.org/pdf/2110.14048.pdf) |
@@ -118,4 +115,4 @@ Following [CAGrad](https://github.com/Cranial-XIX/CAGrad), the MTRL experiments 
 ```
 cd PATH_TO_MTRL/mtrl_files/ && chmod +x mv.sh && ./mv.sh
 ```
-Then follow the `run.sh` script to run experiments (We are still testing the results but the code should be runnable).
+Then follow the `run.sh` script to run experiments

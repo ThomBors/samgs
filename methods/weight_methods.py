@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from scipy.optimize import minimize
 
-
+from utils import MinNormSolver, gradient_normalizers
 
 EPS = 1e-8 # for numerical stability
 
@@ -614,7 +614,7 @@ class NashMTL(WeightMethod):
         self,
         n_tasks: int,
         device: torch.device,
-        max_norm: float = 1.0,
+        max_norm: float = 1.0, 
         update_weights_every: int = 1,
         optim_niter=20,
     ):
@@ -939,6 +939,193 @@ class  SAMGS(WeightMethod):
             torch.nn.utils.clip_grad_norm_(shared_parameters, self.max_norm)
         return None, {"GTG": g, "weights": w}  # NOTE: to align with all other weight methods
 
+class MGDA(WeightMethod):
+    """Based on the official implementation of: Multi-Task Learning as Multi-Objective Optimization
+    Ozan Sener, Vladlen Koltun
+    Neural Information Processing Systems (NeurIPS) 2018
+    https://github.com/intel-isl/MultiObjectiveOptimization
+
+    """
+
+    def __init__(
+        self, n_tasks, device: torch.device, params="shared", normalization="none"
+    ):
+        super().__init__(n_tasks, device=device)
+        self.solver = MinNormSolver()
+        assert params in ["shared", "last", "rep"]
+        self.params = params
+        assert normalization in ["norm", "loss", "loss+", "none"]
+        self.normalization = normalization
+
+    @staticmethod
+    def _flattening(grad):
+        return torch.cat(
+            tuple(
+                g.reshape(
+                    -1,
+                )
+                for i, g in enumerate(grad)
+            ),
+            dim=0,
+        )
+
+    def get_weighted_loss(
+        self,
+        losses,
+        shared_parameters=None,
+        last_shared_parameters=None,
+        representation=None,
+        **kwargs,
+    ):
+        """
+
+        Parameters
+        ----------
+        losses :
+        shared_parameters :
+        last_shared_parameters :
+        representation :
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        # Our code
+        grads = {}
+        params = dict(
+            rep=representation, shared=shared_parameters, last=last_shared_parameters
+        )[self.params]
+        for i, loss in enumerate(losses):
+            g = list(
+                torch.autograd.grad(
+                    loss,
+                    params,
+                    retain_graph=True,
+                )
+            )
+            # Normalize all gradients, this is optional and not included in the paper.
+
+            grads[i] = [torch.flatten(grad) for grad in g]
+
+        gn = gradient_normalizers(grads, losses, self.normalization)
+        for t in range(self.n_tasks):
+            for gr_i in range(len(grads[t])):
+                grads[t][gr_i] = grads[t][gr_i] / gn[t]
+
+        sol, min_norm = self.solver.find_min_norm_element(
+            [grads[t] for t in range(len(grads))]
+        )
+        sol = sol * self.n_tasks  # make sure it sums to self.n_tasks
+        weighted_loss = sum([losses[i] * sol[i] for i in range(len(sol))])
+
+        return weighted_loss, dict(weights=torch.from_numpy(sol.astype(np.float32)))
+
+class RLW(WeightMethod):
+    """Random loss weighting: https://arxiv.org/pdf/2111.10603.pdf"""
+
+    def __init__(self, n_tasks, device: torch.device):
+        super().__init__(n_tasks, device=device)
+
+    def get_weighted_loss(self, losses: torch.Tensor, **kwargs):
+        assert len(losses) == self.n_tasks
+        weight = (F.softmax(torch.randn(self.n_tasks), dim=-1)).to(self.device)
+        loss = torch.sum(losses * weight)
+
+        return loss, dict(weights=weight)
+
+class DynamicWeightAverage(WeightMethod):
+    """Dynamic Weight Average from `End-to-End Multi-Task Learning with Attention`.
+    Modification of: https://github.com/lorenmt/mtan/blob/master/im2im_pred/model_segnet_split.py#L242
+    """
+
+    def __init__(
+        self, n_tasks, device: torch.device, iteration_window: int = 25, temp=2.0
+    ):
+        """
+
+        Parameters
+        ----------
+        n_tasks :
+        iteration_window : 'iteration' loss is averaged over the last 'iteration_window' losses
+        temp :
+        """
+        super().__init__(n_tasks, device=device)
+        self.iteration_window = iteration_window
+        self.temp = temp
+        self.running_iterations = 0
+        self.costs = np.ones((iteration_window * 2, n_tasks), dtype=np.float32)
+        self.weights = np.ones(n_tasks, dtype=np.float32)
+
+    def get_weighted_loss(self, losses, **kwargs):
+
+        cost = losses.detach().cpu().numpy()
+
+        # update costs - fifo
+        self.costs[:-1, :] = self.costs[1:, :]
+        self.costs[-1, :] = cost
+
+        if self.running_iterations > self.iteration_window:
+            ws = self.costs[self.iteration_window :, :].mean(0) / self.costs[
+                : self.iteration_window, :
+            ].mean(0)
+            self.weights = (self.n_tasks * np.exp(ws / self.temp)) / (
+                np.exp(ws / self.temp)
+            ).sum()
+
+        task_weights = torch.from_numpy(self.weights.astype(np.float32)).to(
+            losses.device
+        )
+        loss = (task_weights * losses).mean()
+
+        self.running_iterations += 1
+
+        return loss, dict(weights=task_weights)
+
+class ScaleInvariantLinearScalarization(WeightMethod):
+    """Linear scalarization baseline L = sum_j w_j * l_j where l_j is the loss for task j and w_h"""
+
+    def __init__(
+        self,
+        n_tasks: int,
+        device: torch.device,
+        task_weights: Union[List[float], torch.Tensor] = None,
+    ):
+        super().__init__(n_tasks, device=device)
+        if task_weights is None:
+            task_weights = torch.ones((n_tasks,))
+        if not isinstance(task_weights, torch.Tensor):
+            task_weights = torch.tensor(task_weights)
+        assert len(task_weights) == n_tasks
+        self.task_weights = task_weights.to(device)
+
+    def get_weighted_loss(self, losses, **kwargs):
+        loss = torch.sum(torch.log(losses) * self.task_weights)
+        return loss, dict(weights=self.task_weights)
+    
+class Uncertainty(WeightMethod):
+    """Implementation of `Multi-Task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics`
+    Source: https://github.com/yaringal/multi-task-learning-example/blob/master/multi-task-learning-example-pytorch.ipynb
+    """
+
+    def __init__(self, n_tasks, device: torch.device):
+        super().__init__(n_tasks, device=device)
+        self.logsigma = torch.tensor([0.0] * n_tasks, device=device, requires_grad=True)
+
+    def get_weighted_loss(self, losses: torch.Tensor, **kwargs):
+        loss = sum(
+            [
+                0.5 * (torch.exp(-logs) * loss + logs)
+                for loss, logs in zip(losses, self.logsigma)
+            ]
+        )
+
+        return loss, dict(
+            weights=torch.exp(-self.logsigma)
+        )  # NOTE: not exactly task weights
+
+    def parameters(self) -> List[torch.Tensor]:
+        return [self.logsigma]
 
 class WeightMethods:
     def __init__(self, method: str, n_tasks: int, device: torch.device, **kwargs):
@@ -968,6 +1155,10 @@ class WeightMethods:
 METHODS = dict(
     stl = STL,
     ls = LinearScalarization,
+    uw=Uncertainty,
+    scaleinvls=ScaleInvariantLinearScalarization,
+    rlw=RLW,
+    dwa=DynamicWeightAverage,
     pcgrad = PCGrad,
     graddrop = GradDrop,
     cagrad = CAGrad,

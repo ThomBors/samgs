@@ -1,5 +1,5 @@
 method: famo  
-gamma: 0.01
+gamma: 1e-5
 w_lr: 0.025
 task_weights:  None
 max_norm: 1.0

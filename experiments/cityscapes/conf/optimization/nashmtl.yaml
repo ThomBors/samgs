@@ -1,1 +1,4 @@
 method: nashmtl
+max_norm: 1.0
+update_weights_every: 1
+optim_niter: 20
