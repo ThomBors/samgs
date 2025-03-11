@@ -17,9 +17,9 @@ A series of experimental tests have shown the effectiveness of **SAM-GS** on syn
 </p>
 
 
-Comparison of different MTL methods for 20000 steps. 
-**Top Line**: The loss trajectories of different MTL methods in the loss space. 
-**Bottom Line**: The loss trajectories of different MTL methods in the parameters space.
+Comparison of different MTL methods for 20000 steps.\\
+**Top row**: The loss trajectories of different MTL methods in the loss space.\\
+**Bottom row**: The loss trajectories of different MTL methods in the parameters space.\\
 
 ---
 
@@ -29,7 +29,7 @@ Comparison of different MTL methods for 20000 steps.
 
 
 
-## II. Image-to-Image Prediction
+## Image Experiments
 
 ### Setup environment
 
@@ -90,7 +90,7 @@ python trainer.py --method=X
 
 | Method (code name) | Paper (notes) |
 | :---: | :---: |
-| Aligned-MTL (`alignedmtl`) | [Fast Adaptive Multitask Optimization](https://openaccess.thecvf.com/content/CVPR2023/papers/Senushkin_Independent_Component_Alignment_for_Multi-Task_Learning_CVPR_2023_paper.pdf) |
+| Aligned-MTL (`alignedmtl`) | [Independent Component Alignment for Multi-Task Learning](https://openaccess.thecvf.com/content/CVPR2023/papers/Senushkin_Independent_Component_Alignment_for_Multi-Task_Learning_CVPR_2023_paper.pdf) |
 | FAMO (`famo`) | [Fast Adaptive Multitask Optimization](https://arxiv.org/abs/2306.03792.pdf) |
 | Nash-MTL (`nashmtl`) | [Multi-Task Learning as a Bargaining Game](https://arxiv.org/pdf/2202.01017v1.pdf) |
 | CAGrad (`cagrad`) | [Conflict-Averse Gradient Descent for Multi-task Learning](https://arxiv.org/pdf/2110.14048.pdf) |
@@ -104,7 +104,7 @@ python trainer.py --method=X
 | Random Loss Weighting (`rlw`) | [A Closer Look at Loss Weighting in Multi-Task Learning](https://arxiv.org/pdf/2111.10603.pdf) |
 
 
-## III. Multitask Reinforcement Learning (MTRL)
+## Multitask Reinforcement Learning (MTRL)
 Following [CAGrad](https://github.com/Cranial-XIX/CAGrad), the MTRL experiments are conducted on [Metaworld](https://github.com/rlworkgroup/metaworld) benchmarks. In particular, we follow the [mtrl](https://github.com/facebookresearch/mtrl) codebase and the experiment setup in [this paper](http://proceedings.mlr.press/v139/sodhani21a/sodhani21a.pdf).
 
 1. Install [mtrl](https://github.com/facebookresearch/mtrl) according to the instructions.
