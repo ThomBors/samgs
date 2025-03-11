@@ -13,7 +13,7 @@ A series of experimental tests have shown the effectiveness of **SAM-GS** on syn
 ---
 
 <p align="center"> 
-    <img src="misc/pareto.png" width="800">
+    <img src="misc/pareto.gif" width="800">
 </p>
 
 
