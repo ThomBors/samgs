@@ -111,8 +111,8 @@ Following [CAGrad](https://github.com/Cranial-XIX/CAGrad), the MTRL experiments 
 
 2. Git clone [Metaworld](https://github.com/rlworkgroup/metaworld) and change to `d9a75c451a15b0ba39d8b7a8b6d18d883b8655d8` commit (Feb 26, 2021). Install metaworld accordingly.
 
-3. Copy the `mtrl_files` folder under mtrl of this repo to the cloned repo of mtrl. Then
+3. Copy the `experiments/mtrl_methods` folder under mtrl of this repo to the cloned repo of mtrl. Then
 ```
-cd PATH_TO_MTRL/mtrl_files/ && chmod +x mv.sh && ./mv.sh
+cd PATH_TO_MTRL/mtrl_methods/ && chmod +x mv.sh && ./mv.sh
 ```
 Then follow the `run.sh` script to run experiments
