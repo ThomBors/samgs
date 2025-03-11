@@ -23,9 +23,9 @@ Comparison of different MTL methods for 20000 steps.
 
 ---
 
-<!-- <p align="center"> 
-    <img src="https://github.com/Cranial-XIX/FAMO/blob/main/misc/famo.png" width="800">
-</p> -->
+<p align="center"> 
+    <img src="misc/samgs.png" width="800">
+</p>
 
 
 
