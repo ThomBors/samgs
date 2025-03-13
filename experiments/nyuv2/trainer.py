@@ -338,7 +338,8 @@ def main(cfg):
             ]
 
             # save checkpoints
-            save_checkpoint(chk_path, model, optimizer, scheduler, epoch, custom_step, deltas, keys, avg_cost, loss_list)
+            if cfg.checkpoint.save:
+                save_checkpoint(chk_path, model, optimizer, scheduler, epoch, custom_step, deltas, keys, avg_cost, loss_list)
             
             # save results
             name = f"{cfg.optimization.method}_sd{cfg.random_seed}_momentum{cfg.optimization.momentum}_similarity{cfg.optimization.gamma}_beta2{cfg.optimization.beta2}"

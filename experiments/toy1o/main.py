@@ -41,9 +41,8 @@ def main(cfg):
     torch.manual_seed(cfg.trainer.random_seed)
 
     # set ouptut folder
-    # Convert the strings to Path objects and join them
-    plots_path = Path(cfg.out_path.plots)  # Convert cfg.out_path.plots to a Path object
-    method_path = Path(cfg.optimization.method)  # Convert cfg.optimization.method to a Path object
+    plots_path = Path(cfg.out_path.plots)  
+    method_path = Path(cfg.optimization.method)  
 
     # Combine the paths
     out_path = plots_path / method_path
@@ -106,7 +105,7 @@ def main(cfg):
         
     # plot pareto
     save_path = out_path / f"{cfg.interest_function.function}_{cfg.problem.scale}_2dPareto.png" 
-    ax, fig = plot_2d_pareto(trajectories=all_traj, scale=cfg.problem.scale) #, legend
+    ax, fig = plot_2d_pareto(trajectories=all_traj, scale=cfg.problem.scale) 
     ax.set_title(title_map[cfg.optimization.method], fontsize=25)
 
     fig.savefig(

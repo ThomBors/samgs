@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-
+import logging
 
 class ConfMatrix(object):
     def __init__(self, num_classes):
@@ -54,3 +54,55 @@ KK = np.ones(4) * -1
 
 def delta_fn(a):
     return (KK ** SIGN * (a - BASE) / BASE).mean() * 100.0  # * 100 for percentage
+
+
+
+def load_checkpoint(chk_path, model, optimizer, scheduler, device, epoch=None):
+    
+    checkpoint_files = sorted(chk_path.glob("chk_epoch_*.pth"), key=lambda f: int(f.stem.split('_')[2]), reverse=True)
+    checkpoint_file = checkpoint_files[0]
+    epoch = int(checkpoint_file.stem.split('_')[2])
+    checkpoint_file = chk_path / f"chk_epoch_{epoch}.pth"
+
+    previous_epoch = epoch - 1
+    previous_checkpoint_file = chk_path / f"chk_epoch_{previous_epoch}.pth"
+    
+    try:
+        checkpoint = torch.load(previous_checkpoint_file, map_location=device)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+
+        latest_epoch = checkpoint['epoch']
+        custom_step = checkpoint['custom_step']
+        deltas = checkpoint['metrics']['delta_m']
+        keys = checkpoint['metrics']['keys']
+        avg_cost = checkpoint['metrics']['avg_cost']
+        loss_list = checkpoint['metrics']['losses']
+
+        logging.info(f"Resumed from checkpoint: {previous_checkpoint_file}, epoch {latest_epoch}")
+        return latest_epoch, custom_step, deltas, keys, avg_cost, loss_list
+    except Exception as e:
+        logging.error(f"Failed to load checkpoint from {previous_checkpoint_file}: {e}")
+        raise RuntimeError(f"Failed to load checkpoint {previous_checkpoint_file}.")
+
+
+def save_checkpoint(chk_path, model, optimizer, scheduler, epoch, custom_step, deltas, keys, avg_cost, loss_list):
+    # Define file path for checkpoint `epoch`
+    save_path = chk_path / f"chk_epoch_{epoch}.pth"
+
+    # Save the checkpoint for the current epoch
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'scheduler_state_dict': scheduler.state_dict(),
+        'custom_step': custom_step,
+        'metrics': {
+            "delta_m": deltas,
+            "keys": keys,
+            "avg_cost": avg_cost,
+            "losses": loss_list,
+        }
+    }, save_path)
+    logging.info(f"Checkpoint saved to: {save_path}")

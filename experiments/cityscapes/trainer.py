@@ -17,7 +17,7 @@ from tqdm import trange
 
 from data import Cityscapes
 from models import SegNet, SegNetMtan
-from utils import ConfMatrix, delta_fn, depth_error
+from utils import ConfMatrix, delta_fn, depth_error,load_checkpoint,save_checkpoint
 from experiments.utils import (
     set_logger,
     set_seed,
@@ -150,31 +150,10 @@ def main(cfg:DictConfig):
     
 
     # load checkpoint if exist
-    checkpoint_files = list(chk_path.glob("chk_cityscape.pth"))
+    checkpoint_files = list(chk_path.glob("chk_nyuv2*.pth"))
     if len(checkpoint_files) != 0:
-        checkpoint_files = sorted(chk_path.glob("chk_cityscape.pth"), reverse=True)
-        logging.info(checkpoint_files[0])
-        latest_checkpoint = chk_path.glob("chk_cityscape.pth") #checkpoint_files[0] #max(checkpoint_files, key=lambda x: int(re.search(r'epoch-(\d+)', x.stem).group(1)))
-        # latest_epoch = int(latest_checkpoint.stem.split('-')[1])
-    
-        # Load the checkpoint
-        try:
-            checkpoint = torch.load(chk_path.glob("chk_cityscape.pth"),map_location='cuda' if torch.cuda.is_available() else 'cpu')
-        except Exception as e:
-            logging.error(f"Failed to load checkpoint: {e}")
-            raise
+        latest_epoch, custom_step, deltas, keys, avg_cost, loss_list = load_checkpoint(chk_path, model, optimizer, scheduler,device)
 
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-        latest_epoch = checkpoint['epoch']
-        custom_step = checkpoint['custom_step']
-        deltas = checkpoint['metrics']['deltas']
-        keys = checkpoint['metrics']['keys']
-        avg_cost = checkpoint['metrics']['avg_cost']
-        loss_list = checkpoint['metrics']['loss_list']
-        
-        logging.info(f"Resuming from checkpoint: {latest_checkpoint}, epoch {latest_epoch}")
 
     # some extra statistics we save during training
     
@@ -328,19 +307,8 @@ def main(cfg:DictConfig):
 
             # save checkpoints
             if cfg.checkpoint.save:
-                save_path = chk_path / f"chk_cityscape.pth"
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler_state_dict': scheduler.state_dict(),
-                    'custom_step': custom_step,
-                    'metrics': {
-                        "delta_m": deltas,
-                        "keys": keys,
-                        "avg_cost": avg_cost,
-                        "losses": loss_list,}
-                    }, save_path)
+                save_checkpoint(chk_path, model, optimizer, scheduler, epoch, custom_step, deltas, keys, avg_cost, loss_list)
+            
             
             # save results
             name = f"{cfg.optimization.method}_sd{cfg.random_seed}_momentum{cfg.optimization.momentum}_similarity{cfg.optimization.gamma}_beta2{cfg.optimization.beta2}"

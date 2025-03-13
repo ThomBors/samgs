@@ -22,7 +22,9 @@ data_path: ${hydra:runtime.cwd}/dataset/nyuv2/
 
 out_path: ${hydra:runtime.cwd}/results/nyuv2/${hydra:runtime.version}/outputs
 
-checkpoint_path: ${hydra:runtime.cwd}/checkpoints/nyuv2
+checkpoint: 
+  path: ${hydra:runtime.cwd}/checkpoints/nyuv2
+  save: False
   
 hydra:
   run:

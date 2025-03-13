@@ -106,7 +106,6 @@ def plot_2d_pareto(trajectories: dict, scale,pareto):
         label="Pareto Front",
     )  # Pareto front
 
-    # Corrected line, removing the comma after global_opt
     ax.scatter(
         [-51,-23.7],
         [-23.7,-51],
@@ -149,7 +148,7 @@ def plot_2d_pareto(trajectories: dict, scale,pareto):
         )
 
     sns.despine()
-    # Set only specific ticks (10, 20)
+
     ax.set_xticks([-45,-25])
     ax.set_yticks([-45,-25])
     ax.xaxis.set_label_coords(1.015, -0.03)
@@ -160,60 +159,10 @@ def plot_2d_pareto(trajectories: dict, scale,pareto):
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize(15)
     # Set axis labels with LaTeX formatting
-    ax.set_xlabel(r"$\mathcal{L}_1$", fontsize=20,  loc='right')  # LaTeX for L1
-    ax.set_ylabel(r"$\mathcal{L}_2$", fontsize=20,  loc='top')  # LaTeX for L2
+    ax.set_xlabel(r"$\mathcal{L}_1$", fontsize=20,  loc='right')  
+    ax.set_ylabel(r"$\mathcal{L}_2$", fontsize=20,  loc='top') 
     return ax, fig
 
-
-def create_gif_from_pareto(trajectories: dict, scale=1.0, gif_path="pareto.gif", duration=10):
-    images = []
-
-    # Determine the maximum length of the trajectories to iterate over
-    max_len = max(len(v["traj"]) for v in trajectories.values())
-
-    # Generate and save each frame
-    for i in tqdm(range(0,max_len,100)):
-        # Select only the part of trajectories up to step i
-        truncated_trajectories = {
-            k: {
-                "traj": v["traj"][:i + 1],
-                "grad": v["grad"][:i + 1],  # Assuming you might need grad as well
-                "init": v["init"],
-                "weight": v["weight"],
-            }
-            for k, v in trajectories.items()
-        }
-
-        # Generate the plot
-        ax, fig = plot_2d_pareto(truncated_trajectories, scale)
-
-        # Adjust figure size to ensure legend fits
-        fig.set_size_inches(8, 6)  
-        fig.tight_layout()  
-
-        # Save the figure to an image in memory
-        fig.canvas.draw()
-        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-        image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
-        # Convert to PIL image and append to list
-        pil_image = Image.fromarray(image)
-        images.append(pil_image)
-
-        # Close the figure to avoid memory leaks
-        plt.close(fig)
-
-    # add break between loops
-    images.extend([images[-1]] * 100)
-
-    # Save images as a GIF
-    images[0].save(
-        gif_path,
-        save_all=True,
-        append_images=images[1:],
-        duration=duration,
-        loop=0
-    )
 
 def plot3d(scale,n = 500,xl=11,Interest_function='f12'):
 
@@ -248,7 +197,7 @@ def plot3d(scale,n = 500,xl=11,Interest_function='f12'):
         tick.label1.set_fontsize(15)
 
     ax.view_init(25)
-    ax.text(0, -15, -35, r"$\theta_1$", fontsize=25, rotation=0, color="black")  # Adjust position manually
+    ax.text(0, -15, -35, r"$\theta_1$", fontsize=25, rotation=0, color="black")  
     ax.text(7, 10, -55, r"$\theta_2$", fontsize=25, color="black")
     ax.set_title(r"$\mathcal{L}_{MTL}$", fontsize=30)
     plt.tight_layout()
@@ -259,15 +208,15 @@ def create_grid(Interest_function,n=200):
         x = np.linspace(-8, 8, n)
         y = np.linspace(-8, 8, n)
     elif Interest_function == 'f1':
-        x = np.linspace(-20, 8, n)
-        y = np.linspace(-12, 11, n)
+        x = np.linspace(-8, 18.5, n)
+        y = np.linspace(-8, 11.8, n)
     else:
-        x = np.linspace(-8, 20, n)
-        y = np.linspace(-12, 11, n)
+        x = np.linspace(-18.5, 8, n)
+        y = np.linspace(-8, 11.8, n)
     return np.meshgrid(x, y)
 
 
-def pareto_front_toy(scale,function_name='f12', n=1000, xlim=(-15, 15), zlim=(-13, 5)):
+def pareto_front_toy(scale,function_name='f12', n=1000, xlim=(-19, 19), zlim=(-13, 5)):
     F = Toy(scale=scale,Interest_function=function_name)
     # Generate the grid of x and z values
     x = np.linspace(xlim[0], xlim[1], n)

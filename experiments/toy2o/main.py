@@ -42,9 +42,8 @@ def main(cfg: DictConfig):
     torch.manual_seed(cfg.trainer.random_seed)
 
     # set ouptut folder
-    # Convert the strings to Path objects and join them
-    plots_path = Path(cfg.out_path.plots)  # Convert cfg.out_path.plots to a Path object
-    method_path = Path(cfg.optimization.method)  # Convert cfg.optimization.method to a Path object
+    plots_path = Path(cfg.out_path.plots)  
+    method_path = Path(cfg.optimization.method)  
 
     # Combine the paths
     out_path = plots_path / method_path
@@ -86,7 +85,7 @@ def main(cfg: DictConfig):
             "imtlg": "IMTL-G",
             "graddrop": "GradDrop",
             "alignedmtl": "AlignedMtl",
-            "samgs": "Similarity Magnitude Gradient Surgery"
+            "samgs": "SAM-GS"
         }
 
     

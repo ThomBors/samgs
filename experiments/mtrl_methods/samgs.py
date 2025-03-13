@@ -95,9 +95,6 @@ class Agent(grad_manipulation_agent.Agent):
     ):
         """Regularized gradient algorithm."""
         agent_cfg_copy = deepcopy(agent_cfg)
-        #del agent_cfg_copy['samgs_momentum']
-        #del agent_cfg_copy['samgs_beta2']
-        #del agent_cfg_copy['samgs_gamma']
 
         OmegaConf.set_struct(agent_cfg_copy, False)
         agent_cfg_copy.cfg_to_load_model = None
@@ -116,13 +113,10 @@ class Agent(grad_manipulation_agent.Agent):
         self.agent._compute_gradient = self._compute_gradient
         self._rng = np.random.default_rng()
 
-        #self.b1 = agent_cfg_copy['momentum']
-        #self.b2 = agent_cfg_copy['beta2']
-        #self.gamma = agent_cfg_copy['gamma']
+        self.b1 = agent_cfg_copy['samgs_momentum']
+        self.b2 = agent_cfg_copy['samgs_beta2']
+        self.gamma = agent_cfg_copy['samgs_gamma']
 
-        self.b1 = 0.9
-        self.b2 = 0.9
-        self.gamma = 0.9
         self.m = torch.zeros(1,1,device=device)
         self.v = torch.zeros(1,device=device)
         self.t = 0
@@ -148,7 +142,6 @@ class Agent(grad_manipulation_agent.Agent):
         allow_unused: bool = False,
     ) -> None:
 
-        #t0 = time.time()
         task_loss = self._convert_loss_into_task_loss(
             loss=loss, env_metadata=env_metadata
         )
@@ -173,7 +166,7 @@ class Agent(grad_manipulation_agent.Agent):
                 map(lambda x: torch.nn.utils.parameters_to_vector(x).unsqueeze(0), grad)
             ),
             dim=0,
-        )  # num_tasks x dim
+        )  
 
         regularized_grad = self.samgs(grad_vec)
         apply_vector_grad_to_parameters(regularized_grad, parameters)
@@ -184,7 +177,6 @@ class Agent(grad_manipulation_agent.Agent):
         grad_vec: Tensor of shape [num_tasks, dim]
         """
         mg = torch.linalg.norm(grad_vec, dim=1)  
-        mg_sq = mg ** 2  
 
         mg_i = mg.unsqueeze(0) 
         mg_j = mg.unsqueeze(1)  

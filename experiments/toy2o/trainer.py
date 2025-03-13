@@ -18,8 +18,6 @@ def trainer(cfg, device):
     all_traj = dict()
     all_time = dict()
 
-    # the initial positions
-    # Convert the list of lists into PyTorch tensors
     if not cfg.plotSpecification.inits :
         inits = [torch.tensor([x, y], dtype=torch.float32) for x in torch.arange(-9, 9, 0.05) for y in torch.arange(-12, 11, 0.05)]
     else:
@@ -41,7 +39,7 @@ def trainer(cfg, device):
             method= cfg.optimization.method,
             device=device,
             n_tasks=n_tasks,
-            ** method_params
+            **method_params
         )
 
         optimizer = torch.optim.Adam(params=[x], lr=1e-3)

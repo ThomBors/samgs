@@ -50,7 +50,7 @@ def trainer(cfg, device):
             method= cfg.optimization.method,
             device=device,
             n_tasks=n_tasks,
-            ** method_params
+            **method_params
         )
 
         optimizer = torch.optim.Adam(params=[x], lr=1e-3)
