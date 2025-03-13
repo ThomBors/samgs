@@ -13,7 +13,7 @@ A series of experimental tests have shown the effectiveness of **SAM-GS** on syn
 ---
 
 <p align="center"> 
-    <img src="misc/pareto.gif" width="800">
+    <img src="./misc/pareto.gif" width="800">
 </p>
 
 
@@ -24,7 +24,7 @@ Comparison of different MTL methods for 20000 steps.\\
 ---
 
 <p align="center"> 
-    <img src="misc/samgs.png" width="800">
+    <img src="./misc/samgs.png" width="800">
 </p>
 
 
