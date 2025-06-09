@@ -1,5 +1,5 @@
 # Gradient Similarity Surgery in Multi-task Deep Learning
-Official implementation of the **SAM-GS** optimizer for multitask learning
+Official implementation of the **SAM-GS** optimizer for multitask learning [ArxIv](https://arxiv.org/abs/2506.06130)
 
 The multi-task learning (*MTL*) paradigm aims to simultaneously learn multiple tasks, within a single model, capturing higher-level, more general hidden patterns that are shared by the tasks. 
 In deep learning, a significant challenge in the backpropagation training process is the design of advanced optimisers to improve the convergence speed and stability of the gradient descent learning rule. 
@@ -9,6 +9,7 @@ Gradient surgery methods address the problem explicitly dealing with conflicting
 This work introduces a novel gradient surgery method, the Similarity-Aware Momentum Gradient Surgery (**SAM-GS**), which provides an effective and scalable approach based on a gradient magnitude similarity measure to guide the optimisation process.
 The **SAM-GS** surgery adopts gradient equalisation and modulation of the *first-order momentum*.
 A series of experimental tests have shown the effectiveness of **SAM-GS** on synthetic problems and *MTL* benchmarks. Gradient magnitude similarity plays an important role in *regularising gradient aggregation* in *MTDL* for the optimisation of the learning process.
+
 
 ---
 
